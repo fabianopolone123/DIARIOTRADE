@@ -1,0 +1,17 @@
+{% extends "journal/base.html" %}
+{% block title %}Trade | Diario Trade Web{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>{{ object.symbol }} - {{ object.trade_date }}</h1>
+  <div class="detail-grid">
+    <div><span>Direcao</span><strong>{{ object.direction }}</strong></div>
+    <div><span>Resultado</span><strong>{{ object.result }}</strong></div>
+    <div><span>P&amp;L</span><strong>{{ object.pnl|floatformat:2 }}</strong></div>
+    <div><span>R</span><strong>{{ object.r_multiple|floatformat:2 }}</strong></div>
+  </div>
+  <p>{{ object.market_context }}</p>
+  {% if object.screenshot %}
+    <img src="{{ object.screenshot.url }}" class="screenshot" alt="Screenshot do trade">
+  {% endif %}
+</section>
+{% endblock %}

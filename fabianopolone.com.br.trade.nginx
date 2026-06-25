@@ -1,0 +1,25 @@
+location = /trade {
+    return 301 /trade/;
+}
+
+location /trade/static/ {
+    alias /var/www/trade/staticfiles/;
+    access_log off;
+    expires 7d;
+}
+
+location /trade/media/ {
+    alias /var/www/trade/media/;
+    access_log off;
+    expires 7d;
+}
+
+location /trade/ {
+    rewrite ^/trade(/.*)$ $1 break;
+    proxy_pass http://127.0.0.1:8102;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_redirect off;
+}

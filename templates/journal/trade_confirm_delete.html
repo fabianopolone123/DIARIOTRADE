@@ -1,0 +1,12 @@
+{% extends "journal/base.html" %}
+{% block content %}
+<section class="panel">
+  <h1>Excluir trade</h1>
+  <p>Tem certeza que deseja excluir <strong>{{ object }}</strong>?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button class="btn btn-danger" type="submit">Excluir</button>
+    <a class="btn" href="{% url 'journal:dashboard' %}">Cancelar</a>
+  </form>
+</section>
+{% endblock %}

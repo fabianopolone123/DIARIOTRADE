@@ -1,0 +1,28 @@
+<!doctype html>
+{% load static %}
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login | Diario Trade Web</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body class="auth-body">
+  <main class="auth-shell">
+    <section class="auth-card">
+      <div class="brand">Diario Trade Web</div>
+      <h1>Entrar</h1>
+      <p>Use suas credenciais para acessar o diário de trades.</p>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <label>Usuario</label>
+        {{ form.username }}
+        <label>Senha</label>
+        {{ form.password }}
+        <button type="submit" class="btn btn-primary">Acessar</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

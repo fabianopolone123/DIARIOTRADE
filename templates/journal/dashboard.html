@@ -1,0 +1,61 @@
+{% extends "journal/base.html" %}
+{% block title %}Painel | Diário Trade Web{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>Painel</h1>
+    <p>Resumo da sua operação com filtros, lista e acesso rápido ao cadastro.</p>
+  </div>
+  <div class="stats">
+    <div><span>Trades</span><strong>{{ summary.total|default:0 }}</strong></div>
+    <div><span>P&amp;L</span><strong>{{ summary.pnl_total|default:0|floatformat:2 }}</strong></div>
+    <div><span>R medio</span><strong>{{ summary.avg_r|default:0|floatformat:2 }}</strong></div>
+  </div>
+</section>
+
+<section class="panel">
+  <form class="filters" method="get">
+    <input class="input" type="text" name="symbol" placeholder="Ativo" value="{{ filters.symbol }}">
+    <input class="input" type="date" name="date_from" value="{{ filters.date_from }}">
+    <input class="input" type="date" name="date_to" value="{{ filters.date_to }}">
+    <select class="input" name="result">
+      <option value="">Todos</option>
+      <option value="Gain" {% if filters.result == "Gain" %}selected{% endif %}>Gain</option>
+      <option value="Loss" {% if filters.result == "Loss" %}selected{% endif %}>Loss</option>
+      <option value="Zero" {% if filters.result == "Zero" %}selected{% endif %}>Zero</option>
+    </select>
+    <button class="btn btn-primary" type="submit">Filtrar</button>
+  </form>
+</section>
+
+<section class="panel table-panel">
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th><th>Hora</th><th>Ativo</th><th>Dir</th><th>Resultado</th><th>Setup</th><th>Qtd</th><th>R</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for trade in trades %}
+      <tr>
+        <td>{{ trade.trade_date }}</td>
+        <td>{{ trade.entry_time|default:"" }}</td>
+        <td>{{ trade.symbol }}</td>
+        <td>{{ trade.direction }}</td>
+        <td>{{ trade.result }}</td>
+        <td>{{ trade.setup }}</td>
+        <td>{{ trade.quantity }}</td>
+        <td>{{ trade.r_multiple|floatformat:2 }}</td>
+        <td class="row-actions">
+          <a href="{% url 'journal:trade_detail' trade.pk %}">Abrir</a>
+          <a href="{% url 'journal:trade_update' trade.pk %}">Editar</a>
+          <a href="{% url 'journal:trade_delete' trade.pk %}">Excluir</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9" class="empty">Nenhum trade cadastrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

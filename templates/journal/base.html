@@ -1,0 +1,26 @@
+<!doctype html>
+{% load static %}
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Diário Trade Web{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="brand">Diário Trade Web</div>
+      <div class="subtitle">Diário operacional com login e analytics</div>
+    </div>
+    <nav class="topbar-actions">
+      <a class="btn" href="{% url 'journal:trade_create' %}">Novo trade</a>
+      <a class="btn" href="{% url 'logout' %}">Sair</a>
+    </nav>
+  </header>
+  <main class="page">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

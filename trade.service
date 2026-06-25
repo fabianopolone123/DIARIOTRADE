@@ -1,0 +1,19 @@
+[Unit]
+Description=Diario Trade Django Site
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/trade
+Environment="DJANGO_DEBUG=False"
+Environment="DJANGO_SECRET_KEY=troque-essa-chave-por-uma-grande"
+Environment="DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,fabianopolone.com.br,www.fabianopolone.com.br"
+Environment="DJANGO_CSRF_TRUSTED_ORIGINS=https://fabianopolone.com.br,https://www.fabianopolone.com.br"
+Environment="TMPDIR=/tmp"
+RuntimeDirectory=trade
+RuntimeDirectoryMode=0755
+ExecStart=/var/www/trade/venv/bin/gunicorn --worker-tmp-dir /tmp --workers 3 --bind 127.0.0.1:8102 diariotradew.wsgi:application
+
+[Install]
+WantedBy=multi-user.target

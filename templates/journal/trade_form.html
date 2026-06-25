@@ -1,0 +1,270 @@
+{% extends "journal/base.html" %}
+{% block title %}Cadastro | Diário Trade Web{% endblock %}
+{% block head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>{% if object %}Editar trade{% else %}Novo trade{% endif %}</h1>
+  <form method="post" enctype="multipart/form-data" class="trade-grid" id="trade-form">
+    {% csrf_token %}
+    <div class="grid-2">
+      <div class="field">
+        <label for="{{ form.trade_date.id_for_label }}">Data</label>
+        <div class="inline-action">
+          {{ form.trade_date }}
+          <button class="btn" type="button" data-fill="trade_date">Hoje</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="{{ form.entry_time.id_for_label }}">Hora de entrada</label>
+        <div class="inline-action">
+          {{ form.entry_time }}
+          <button class="btn" type="button" data-fill="entry_time">Agora</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="{{ form.exit_time.id_for_label }}">Hora de saída</label>
+        <div class="inline-action">
+          {{ form.exit_time }}
+          <button class="btn" type="button" data-fill="exit_time">Agora</button>
+        </div>
+      </div>
+      <div class="field">{{ form.symbol.label_tag }}{{ form.symbol }}</div>
+      <div class="field">{{ form.direction.label_tag }}{{ form.direction }}</div>
+      <div class="field">
+        {{ form.setup.label_tag }}
+        {{ form.setup }}
+        <small class="hint">Escolha um setup ou selecione <strong>+ Cadastrar novo</strong>.</small>
+      </div>
+      <div class="field">{{ form.timeframe.label_tag }}{{ form.timeframe }}</div>
+      <div class="field">{{ form.entry_price.label_tag }}{{ form.entry_price }}</div>
+      <div class="field">{{ form.exit_price.label_tag }}{{ form.exit_price }}</div>
+      <div class="field">{{ form.quantity.label_tag }}{{ form.quantity }}</div>
+      <div class="field">{{ form.stop_loss.label_tag }}{{ form.stop_loss }}<small class="hint">Em pontos.</small></div>
+      <div class="field">{{ form.target_price.label_tag }}{{ form.target_price }}<small class="hint">Em pontos.</small></div>
+      <div class="field checkbox-field">{{ form.planned_trade }} <label for="{{ form.planned_trade.id_for_label }}">Operação planejada</label></div>
+      <div class="field checkbox-field">{{ form.followed_plan }} <label for="{{ form.followed_plan.id_for_label }}">Seguiu o plano</label></div>
+      <div class="field">{{ form.result.label_tag }}{{ form.result }}</div>
+      <div class="field">{{ form.execution_grade.label_tag }}{{ form.execution_grade }}</div>
+      <div class="field">
+        {{ form.emotion_before.label_tag }}
+        {{ form.emotion_before }}
+        <small class="hint">Escolha uma emoção ou cadastre nova.</small>
+      </div>
+      <div class="field">{{ form.emotion_during.label_tag }}{{ form.emotion_during }}</div>
+      <div class="field">{{ form.emotion_after.label_tag }}{{ form.emotion_after }}</div>
+      <div class="field field-wide">{{ form.market_context.label_tag }}{{ form.market_context }}</div>
+      <div class="field field-wide">{{ form.entry_reason.label_tag }}{{ form.entry_reason }}</div>
+      <div class="field field-wide">{{ form.exit_reason.label_tag }}{{ form.exit_reason }}</div>
+      <div class="field field-wide">{{ form.mistakes.label_tag }}{{ form.mistakes }}</div>
+      <div class="field field-wide">{{ form.lessons.label_tag }}{{ form.lessons }}</div>
+      <div class="field field-wide">
+        {{ form.screenshot.label_tag }}
+        {{ form.screenshot }}
+        <div class="mini-actions">
+          <button class="btn" type="button" id="capture-region-btn">Tirar print da região</button>
+          <span class="hint">Selecione uma área da página para anexar ao trade.</span>
+        </div>
+        <img id="screenshot-preview" class="screenshot-preview" alt="Pré-visualização da captura" hidden>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Salvar</button>
+      <a class="btn" href="{% url 'journal:dashboard' %}">Cancelar</a>
+    </div>
+  </form>
+</section>
+<div class="modal" id="option-modal" aria-hidden="true">
+  <div class="modal-backdrop" data-close-modal></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="option-modal-title">
+    <h2 id="option-modal-title">Cadastrar novo item</h2>
+    <p class="hint">Digite o nome e salve para adicioná-lo à lista.</p>
+    <label id="option-modal-label" for="new-option-name">Nome</label>
+    <input id="new-option-name" class="input" type="text" placeholder="Ex.: Rompimento com pullback">
+    <div class="form-actions modal-actions">
+      <button class="btn" type="button" data-close-modal>Cancelar</button>
+      <button class="btn btn-primary" type="button" id="save-new-option">Salvar</button>
+    </div>
+  </div>
+</div>
+<script>
+  (() => {
+    const preview = document.getElementById("screenshot-preview");
+    const fileInput = document.getElementById("id_screenshot");
+    const captureBtn = document.getElementById("capture-region-btn");
+    const setupSelect = document.getElementById("id_setup");
+    const emotionSelects = ["id_emotion_before", "id_emotion_during", "id_emotion_after"]
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
+    const optionModal = document.getElementById("option-modal");
+    const optionLabel = document.getElementById("option-modal-label");
+    const optionInput = document.getElementById("new-option-name");
+    const saveOptionBtn = document.getElementById("save-new-option");
+    const newOptionLabel = "+ Cadastrar novo";
+    let activeField = null;
+
+    const pad = (n) => String(n).padStart(2, "0");
+    const today = () => {
+      const d = new Date();
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    };
+    const nowTime = () => {
+      const d = new Date();
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+
+    document.querySelectorAll("[data-fill]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const field = document.getElementById(`id_${button.dataset.fill}`);
+        if (!field) return;
+        field.value = button.dataset.fill === "trade_date" ? today() : nowTime();
+      });
+    });
+
+    const setScreenshotFile = async (blob) => {
+      const file = new File([blob], `print_${Date.now()}.png`, { type: "image/png" });
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fileInput.files = dt.files;
+      preview.src = URL.createObjectURL(blob);
+      preview.hidden = false;
+    };
+
+    const openModal = () => {
+      optionModal.classList.add("is-open");
+      optionModal.setAttribute("aria-hidden", "false");
+      optionInput.value = "";
+      optionLabel.textContent = activeField === "setup" ? "Nome do setup" : "Nome da emoção";
+      optionInput.placeholder = activeField === "setup" ? "Ex.: Rompimento com pullback" : "Ex.: Calmo";
+      setTimeout(() => optionInput.focus(), 0);
+    };
+
+    const closeModal = () => {
+      optionModal.classList.remove("is-open");
+      optionModal.setAttribute("aria-hidden", "true");
+      activeField = null;
+    };
+
+    document.querySelectorAll("[data-close-modal]").forEach((button) => {
+      button.addEventListener("click", closeModal);
+    });
+
+    const hookSelect = (select, fieldName) => {
+      if (!select) return;
+      select.addEventListener("change", () => {
+        if (select.value === newOptionLabel) {
+          activeField = fieldName;
+          openModal();
+        }
+      });
+      if (select.value === newOptionLabel) {
+        activeField = fieldName;
+        openModal();
+      }
+    };
+
+    hookSelect(setupSelect, "setup");
+    emotionSelects.forEach((select) => hookSelect(select, select.id));
+
+    saveOptionBtn.addEventListener("click", () => {
+      const value = optionInput.value.trim();
+      if (!value) {
+        optionInput.focus();
+        return;
+      }
+
+      const targetSelects = activeField === "setup"
+        ? [setupSelect]
+        : emotionSelects.filter((select) => select.id === activeField);
+
+      targetSelects.forEach((select) => {
+        if (!select) return;
+        const exists = Array.from(select.options).some((option) => option.value === value);
+        if (!exists) {
+          const option = new Option(value, value, true, true);
+          select.add(option, select.options.length - 1);
+        } else {
+          select.value = value;
+        }
+      });
+
+      closeModal();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (!optionModal.classList.contains("is-open")) return;
+      if (event.key === "Escape") closeModal();
+      if (event.key === "Enter" && event.target === optionInput) {
+        event.preventDefault();
+        saveOptionBtn.click();
+      }
+    });
+
+    captureBtn.addEventListener("click", async () => {
+      if (!window.html2canvas) {
+        alert("Biblioteca de captura não carregou.");
+        return;
+      }
+      captureBtn.disabled = true;
+      captureBtn.textContent = "Selecione a região...";
+      try {
+        const overlay = document.createElement("div");
+        overlay.className = "capture-overlay";
+        document.body.appendChild(overlay);
+
+        const selection = document.createElement("div");
+        selection.className = "capture-selection";
+        overlay.appendChild(selection);
+
+        let startX = 0, startY = 0, active = false;
+
+        const finish = async (x1, y1, x2, y2) => {
+          document.body.removeChild(overlay);
+          const canvas = await html2canvas(document.body, { useCORS: true, backgroundColor: null });
+          const sx = Math.max(0, Math.min(x1, x2));
+          const sy = Math.max(0, Math.min(y1, y2));
+          const sw = Math.abs(x2 - x1);
+          const sh = Math.abs(y2 - y1);
+          const crop = document.createElement("canvas");
+          crop.width = sw;
+          crop.height = sh;
+          crop.getContext("2d").drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh);
+          crop.toBlob((blob) => {
+            if (blob) setScreenshotFile(blob);
+          }, "image/png");
+        };
+
+        overlay.addEventListener("mousedown", (e) => {
+          active = true;
+          startX = e.pageX;
+          startY = e.pageY;
+          selection.style.left = `${startX}px`;
+          selection.style.top = `${startY}px`;
+          selection.style.width = "0px";
+          selection.style.height = "0px";
+        });
+        overlay.addEventListener("mousemove", (e) => {
+          if (!active) return;
+          const x = Math.min(startX, e.pageX);
+          const y = Math.min(startY, e.pageY);
+          const w = Math.abs(e.pageX - startX);
+          const h = Math.abs(e.pageY - startY);
+          selection.style.left = `${x}px`;
+          selection.style.top = `${y}px`;
+          selection.style.width = `${w}px`;
+          selection.style.height = `${h}px`;
+        });
+        overlay.addEventListener("mouseup", (e) => {
+          if (!active) return;
+          active = false;
+          finish(startX, startY, e.pageX, e.pageY);
+        });
+      } finally {
+        captureBtn.disabled = false;
+        captureBtn.textContent = "Tirar print da região";
+      }
+    });
+  })();
+</script>
+{% endblock %}
