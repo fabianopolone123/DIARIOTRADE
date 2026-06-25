@@ -1,8 +1,5 @@
 {% extends "journal/base.html" %}
-{% block title %}Cadastro | Diário Trade Web{% endblock %}
-{% block head_extra %}
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-{% endblock %}
+{% block title %}Cadastro | Diario Trade Web{% endblock %}
 {% block content %}
 <section class="panel">
   <h1>{% if object %}Editar trade{% else %}Novo trade{% endif %}</h1>
@@ -24,7 +21,7 @@
         </div>
       </div>
       <div class="field">
-        <label for="{{ form.exit_time.id_for_label }}">Hora de saída</label>
+        <label for="{{ form.exit_time.id_for_label }}">Hora de saida</label>
         <div class="inline-action">
           {{ form.exit_time }}
           <button class="btn" type="button" data-fill="exit_time">Agora</button>
@@ -43,14 +40,14 @@
       <div class="field">{{ form.quantity.label_tag }}{{ form.quantity }}</div>
       <div class="field">{{ form.stop_loss.label_tag }}{{ form.stop_loss }}<small class="hint">Em pontos.</small></div>
       <div class="field">{{ form.target_price.label_tag }}{{ form.target_price }}<small class="hint">Em pontos.</small></div>
-      <div class="field checkbox-field">{{ form.planned_trade }} <label for="{{ form.planned_trade.id_for_label }}">Operação planejada</label></div>
+      <div class="field checkbox-field">{{ form.planned_trade }} <label for="{{ form.planned_trade.id_for_label }}">Operacao planejada</label></div>
       <div class="field checkbox-field">{{ form.followed_plan }} <label for="{{ form.followed_plan.id_for_label }}">Seguiu o plano</label></div>
       <div class="field">{{ form.result.label_tag }}{{ form.result }}</div>
       <div class="field">{{ form.execution_grade.label_tag }}{{ form.execution_grade }}</div>
       <div class="field">
         {{ form.emotion_before.label_tag }}
         {{ form.emotion_before }}
-        <small class="hint">Escolha uma emoção ou cadastre nova.</small>
+        <small class="hint">Escolha uma emocao ou cadastre nova.</small>
       </div>
       <div class="field">{{ form.emotion_during.label_tag }}{{ form.emotion_during }}</div>
       <div class="field">{{ form.emotion_after.label_tag }}{{ form.emotion_after }}</div>
@@ -63,10 +60,10 @@
         {{ form.screenshot.label_tag }}
         {{ form.screenshot }}
         <div class="mini-actions">
-          <button class="btn" type="button" id="capture-region-btn">Tirar print da região</button>
-          <span class="hint">Selecione uma área da página para anexar ao trade.</span>
+          <button class="btn" type="button" id="capture-region-btn">Tirar print da regiao</button>
+          <span class="hint">Captura via navegador da tela ou janela compartilhada.</span>
         </div>
-        <img id="screenshot-preview" class="screenshot-preview" alt="Pré-visualização da captura" hidden>
+        <img id="screenshot-preview" class="screenshot-preview" alt="Pre-visualizacao da captura" hidden>
       </div>
     </div>
     <div class="form-actions">
@@ -75,11 +72,12 @@
     </div>
   </form>
 </section>
+
 <div class="modal" id="option-modal" aria-hidden="true">
   <div class="modal-backdrop" data-close-modal></div>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="option-modal-title">
     <h2 id="option-modal-title">Cadastrar novo item</h2>
-    <p class="hint">Digite o nome e salve para adicioná-lo à lista.</p>
+    <p class="hint">Digite o nome e salve para adiciona-lo a lista.</p>
     <label id="option-modal-label" for="new-option-name">Nome</label>
     <input id="new-option-name" class="input" type="text" placeholder="Ex.: Rompimento com pullback">
     <div class="form-actions modal-actions">
@@ -88,21 +86,44 @@
     </div>
   </div>
 </div>
+
+<div class="modal" id="capture-modal" aria-hidden="true">
+  <div class="modal-backdrop" id="capture-backdrop"></div>
+  <div class="modal-card capture-card" role="dialog" aria-modal="true" aria-labelledby="capture-title">
+    <h2 id="capture-title">Capturar tela</h2>
+    <p class="hint">O navegador vai abrir o seletor de tela/janela. Se houver mais de um monitor, escolha o monitor correto e depois recorte a regiao desejada.</p>
+    <div class="capture-stage">
+      <canvas id="capture-canvas"></canvas>
+      <div id="capture-selection" class="capture-selection capture-selection-hidden"></div>
+    </div>
+    <div class="form-actions modal-actions">
+      <button class="btn" type="button" id="capture-cancel">Cancelar</button>
+      <button class="btn btn-primary" type="button" id="capture-save" disabled>Salvar print</button>
+    </div>
+  </div>
+</div>
+
 <script>
   (() => {
     const preview = document.getElementById("screenshot-preview");
     const fileInput = document.getElementById("id_screenshot");
     const captureBtn = document.getElementById("capture-region-btn");
+    const captureModal = document.getElementById("capture-modal");
+    const captureCanvas = document.getElementById("capture-canvas");
+    const captureSelection = document.getElementById("capture-selection");
+    const captureSave = document.getElementById("capture-save");
+    const captureCancel = document.getElementById("capture-cancel");
+    const captureBackdrop = document.getElementById("capture-backdrop");
     const setupSelect = document.getElementById("id_setup");
-    const emotionSelects = ["id_emotion_before", "id_emotion_during", "id_emotion_after"]
-      .map((id) => document.getElementById(id))
-      .filter(Boolean);
+    const emotionSelects = ["id_emotion_before", "id_emotion_during", "id_emotion_after"].map((id) => document.getElementById(id)).filter(Boolean);
     const optionModal = document.getElementById("option-modal");
     const optionLabel = document.getElementById("option-modal-label");
     const optionInput = document.getElementById("new-option-name");
     const saveOptionBtn = document.getElementById("save-new-option");
     const newOptionLabel = "+ Cadastrar novo";
     let activeField = null;
+    let captureStream = null;
+    let captureState = null;
 
     const pad = (n) => String(n).padStart(2, "0");
     const today = () => {
@@ -122,7 +143,7 @@
       });
     });
 
-    const setScreenshotFile = async (blob) => {
+    const setScreenshotFile = (blob) => {
       const file = new File([blob], `print_${Date.now()}.png`, { type: "image/png" });
       const dt = new DataTransfer();
       dt.items.add(file);
@@ -131,41 +152,41 @@
       preview.hidden = false;
     };
 
-    const openModal = () => {
+    const openOptionModal = () => {
       optionModal.classList.add("is-open");
       optionModal.setAttribute("aria-hidden", "false");
       optionInput.value = "";
-      optionLabel.textContent = activeField === "setup" ? "Nome do setup" : "Nome da emoção";
+      optionLabel.textContent = activeField === "setup" ? "Nome do setup" : "Nome da emocao";
       optionInput.placeholder = activeField === "setup" ? "Ex.: Rompimento com pullback" : "Ex.: Calmo";
       setTimeout(() => optionInput.focus(), 0);
     };
 
-    const closeModal = () => {
+    const closeOptionModal = () => {
       optionModal.classList.remove("is-open");
       optionModal.setAttribute("aria-hidden", "true");
       activeField = null;
     };
-
-    document.querySelectorAll("[data-close-modal]").forEach((button) => {
-      button.addEventListener("click", closeModal);
-    });
 
     const hookSelect = (select, fieldName) => {
       if (!select) return;
       select.addEventListener("change", () => {
         if (select.value === newOptionLabel) {
           activeField = fieldName;
-          openModal();
+          openOptionModal();
         }
       });
       if (select.value === newOptionLabel) {
         activeField = fieldName;
-        openModal();
+        openOptionModal();
       }
     };
 
     hookSelect(setupSelect, "setup");
     emotionSelects.forEach((select) => hookSelect(select, select.id));
+
+    document.querySelectorAll("[data-close-modal]").forEach((button) => {
+      button.addEventListener("click", closeOptionModal);
+    });
 
     saveOptionBtn.addEventListener("click", () => {
       const value = optionInput.value.trim();
@@ -173,11 +194,9 @@
         optionInput.focus();
         return;
       }
-
       const targetSelects = activeField === "setup"
         ? [setupSelect]
         : emotionSelects.filter((select) => select.id === activeField);
-
       targetSelects.forEach((select) => {
         if (!select) return;
         const exists = Array.from(select.options).some((option) => option.value === value);
@@ -188,82 +207,140 @@
           select.value = value;
         }
       });
-
-      closeModal();
+      closeOptionModal();
     });
 
     document.addEventListener("keydown", (event) => {
       if (!optionModal.classList.contains("is-open")) return;
-      if (event.key === "Escape") closeModal();
+      if (event.key === "Escape") closeOptionModal();
       if (event.key === "Enter" && event.target === optionInput) {
         event.preventDefault();
         saveOptionBtn.click();
       }
     });
 
+    const closeCapture = () => {
+      captureModal.classList.remove("is-open");
+      captureSelection.classList.add("capture-selection-hidden");
+      captureState = null;
+      captureSave.disabled = true;
+      if (captureStream) {
+        captureStream.getTracks().forEach((track) => track.stop());
+        captureStream = null;
+      }
+    };
+
+    captureCancel.addEventListener("click", closeCapture);
+    captureBackdrop.addEventListener("click", closeCapture);
+
+    const drawFrame = async (stream) => {
+      captureStream = stream;
+      const track = stream.getVideoTracks()[0];
+      const settings = track.getSettings();
+      captureCanvas.width = settings.width || 1280;
+      captureCanvas.height = settings.height || 720;
+      const ctx = captureCanvas.getContext("2d");
+      const video = document.createElement("video");
+      video.srcObject = stream;
+      video.muted = true;
+      await video.play();
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      ctx.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
+      video.pause();
+      video.srcObject = null;
+    };
+
     captureBtn.addEventListener("click", async () => {
-      if (!window.html2canvas) {
-        alert("Biblioteca de captura não carregou.");
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        alert("Seu navegador nao suporta captura de tela.");
         return;
       }
       captureBtn.disabled = true;
-      captureBtn.textContent = "Selecione a região...";
+      captureBtn.textContent = "Aguardando permissao...";
       try {
-        const overlay = document.createElement("div");
-        overlay.className = "capture-overlay";
-        document.body.appendChild(overlay);
-
-        const selection = document.createElement("div");
-        selection.className = "capture-selection";
-        overlay.appendChild(selection);
-
-        let startX = 0, startY = 0, active = false;
-
-        const finish = async (x1, y1, x2, y2) => {
-          document.body.removeChild(overlay);
-          const canvas = await html2canvas(document.body, { useCORS: true, backgroundColor: null });
-          const sx = Math.max(0, Math.min(x1, x2));
-          const sy = Math.max(0, Math.min(y1, y2));
-          const sw = Math.abs(x2 - x1);
-          const sh = Math.abs(y2 - y1);
-          const crop = document.createElement("canvas");
-          crop.width = sw;
-          crop.height = sh;
-          crop.getContext("2d").drawImage(canvas, sx, sy, sw, sh, 0, 0, sw, sh);
-          crop.toBlob((blob) => {
-            if (blob) setScreenshotFile(blob);
-          }, "image/png");
-        };
-
-        overlay.addEventListener("mousedown", (e) => {
-          active = true;
-          startX = e.pageX;
-          startY = e.pageY;
-          selection.style.left = `${startX}px`;
-          selection.style.top = `${startY}px`;
-          selection.style.width = "0px";
-          selection.style.height = "0px";
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            displaySurface: "monitor",
+            cursor: "always",
+          },
+          audio: false,
         });
-        overlay.addEventListener("mousemove", (e) => {
-          if (!active) return;
-          const x = Math.min(startX, e.pageX);
-          const y = Math.min(startY, e.pageY);
-          const w = Math.abs(e.pageX - startX);
-          const h = Math.abs(e.pageY - startY);
-          selection.style.left = `${x}px`;
-          selection.style.top = `${y}px`;
-          selection.style.width = `${w}px`;
-          selection.style.height = `${h}px`;
-        });
-        overlay.addEventListener("mouseup", (e) => {
-          if (!active) return;
-          active = false;
-          finish(startX, startY, e.pageX, e.pageY);
-        });
+        await drawFrame(stream);
+        captureSelection.classList.add("capture-selection-hidden");
+        captureModal.classList.add("is-open");
+        captureModal.setAttribute("aria-hidden", "false");
+        captureSave.disabled = true;
+      } catch (error) {
+        alert("Captura cancelada ou nao autorizada.");
       } finally {
         captureBtn.disabled = false;
-        captureBtn.textContent = "Tirar print da região";
+        captureBtn.textContent = "Tirar print da regiao";
       }
+    });
+
+    const canvasPointFromEvent = (event) => {
+      const rect = captureCanvas.getBoundingClientRect();
+      const scaleX = captureCanvas.width / rect.width;
+      const scaleY = captureCanvas.height / rect.height;
+      return {
+        x: Math.max(0, Math.min(captureCanvas.width, (event.clientX - rect.left) * scaleX)),
+        y: Math.max(0, Math.min(captureCanvas.height, (event.clientY - rect.top) * scaleY)),
+        rect,
+        scaleX,
+        scaleY,
+      };
+    };
+
+    captureCanvas.addEventListener("mousedown", (event) => {
+      if (!captureStream) return;
+      const point = canvasPointFromEvent(event);
+      captureState = { startX: point.x, startY: point.y, endX: point.x, endY: point.y, active: true };
+      captureSelection.classList.remove("capture-selection-hidden");
+      captureSelection.style.left = `${event.clientX - point.rect.left}px`;
+      captureSelection.style.top = `${event.clientY - point.rect.top}px`;
+      captureSelection.style.width = "0px";
+      captureSelection.style.height = "0px";
+    });
+
+    window.addEventListener("mousemove", (event) => {
+      if (!captureState || !captureState.active) return;
+      const point = canvasPointFromEvent(event);
+      captureState.endX = point.x;
+      captureState.endY = point.y;
+      const x = Math.min(captureState.startX, captureState.endX);
+      const y = Math.min(captureState.startY, captureState.endY);
+      const w = Math.abs(captureState.endX - captureState.startX);
+      const h = Math.abs(captureState.endY - captureState.startY);
+      captureSelection.style.left = `${x / point.scaleX}px`;
+      captureSelection.style.top = `${y / point.scaleY}px`;
+      captureSelection.style.width = `${w / point.scaleX}px`;
+      captureSelection.style.height = `${h / point.scaleY}px`;
+    });
+
+    window.addEventListener("mouseup", () => {
+      if (!captureState || !captureState.active) return;
+      captureState.active = false;
+      captureSave.disabled = false;
+    });
+
+    captureSave.addEventListener("click", () => {
+      if (!captureState) return;
+      const x = Math.min(captureState.startX, captureState.endX);
+      const y = Math.min(captureState.startY, captureState.endY);
+      const w = Math.abs(captureState.endX - captureState.startX);
+      const h = Math.abs(captureState.endY - captureState.startY);
+      if (w < 10 || h < 10) {
+        alert("Selecione uma area maior.");
+        return;
+      }
+      const output = document.createElement("canvas");
+      output.width = w;
+      output.height = h;
+      output.getContext("2d").drawImage(captureCanvas, x, y, w, h, 0, 0, w, h);
+      output.toBlob((blob) => {
+        if (blob) setScreenshotFile(blob);
+      }, "image/png");
+      closeCapture();
     });
   })();
 </script>

@@ -38,6 +38,10 @@ log "Aplicando migracoes"
 log "Coletando static"
 "$PYTHON_BIN" "$MANAGE_PY" collectstatic --noinput
 
+log "Ajustando permissões do SQLite"
+chown -R www-data:www-data "$APP_DIR"
+chmod 664 "$APP_DIR/db.sqlite3"
+
 log "Reiniciando servico"
 systemctl restart "$SERVICE_NAME"
 systemctl reload nginx
