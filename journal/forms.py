@@ -22,6 +22,18 @@ class TradeForm(forms.ModelForm):
         emotion_choices = kwargs.pop("emotion_choices", None)
         super().__init__(*args, **kwargs)
 
+        self.fields["setup"].label = "Setup"
+        self.fields["emotion_before"].label = "Emoção antes"
+        self.fields["emotion_during"].label = "Emoção durante"
+        self.fields["emotion_after"].label = "Emoção depois"
+        self.fields["market_context"].label = "Contexto do mercado"
+        self.fields["entry_reason"].label = "Motivo da entrada"
+        self.fields["exit_reason"].label = "Motivo da saída"
+        self.fields["planned_trade"].label = "Operação planejada"
+        self.fields["followed_plan"].label = "Seguiu o plano"
+        self.fields["result"].label = "Resultado"
+        self.fields["screenshot"].label = "Print da tela"
+
         if setup_choices is None:
             setup_choices = list(
                 JournalOption.objects.filter(kind="setup").order_by("label").values_list("label", "label")
@@ -76,19 +88,6 @@ class TradeForm(forms.ModelForm):
             "result",
             "screenshot",
         ]
-        labels = {
-            "setup": "Setup",
-            "emotion_before": "Emoção antes",
-            "emotion_during": "Emoção durante",
-            "emotion_after": "Emoção depois",
-            "market_context": "Contexto de mercado",
-            "entry_reason": "Motivo da entrada",
-            "exit_reason": "Motivo da saída",
-            "planned_trade": "Operação planejada",
-            "followed_plan": "Seguiu o plano",
-            "result": "Resultado",
-            "screenshot": "Print da tela",
-        }
         widgets = {
             "trade_date": forms.DateInput(attrs={"type": "date", "class": "input"}),
             "entry_time": forms.TimeInput(attrs={"type": "time", "class": "input"}),

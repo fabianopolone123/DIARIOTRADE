@@ -45,17 +45,38 @@
       <div class="field">{{ form.result.label_tag }}{{ form.result }}</div>
       <div class="field">{{ form.execution_grade.label_tag }}{{ form.execution_grade }}</div>
       <div class="field">
-        {{ form.emotion_before.label_tag }}
+        <label for="{{ form.emotion_before.id_for_label }}">Emoção antes</label>
         {{ form.emotion_before }}
         <small class="hint">Escolha uma emoção ou cadastre nova.</small>
       </div>
-      <div class="field">{{ form.emotion_during.label_tag }}{{ form.emotion_during }}</div>
-      <div class="field">{{ form.emotion_after.label_tag }}{{ form.emotion_after }}</div>
-      <div class="field field-wide">{{ form.market_context.label_tag }}{{ form.market_context }}</div>
-      <div class="field field-wide">{{ form.entry_reason.label_tag }}{{ form.entry_reason }}</div>
-      <div class="field field-wide">{{ form.exit_reason.label_tag }}{{ form.exit_reason }}</div>
-      <div class="field field-wide">{{ form.mistakes.label_tag }}{{ form.mistakes }}</div>
-      <div class="field field-wide">{{ form.lessons.label_tag }}{{ form.lessons }}</div>
+      <div class="field">
+        <label for="{{ form.emotion_during.id_for_label }}">Emoção durante</label>
+        {{ form.emotion_during }}
+      </div>
+      <div class="field">
+        <label for="{{ form.emotion_after.id_for_label }}">Emoção depois</label>
+        {{ form.emotion_after }}
+      </div>
+      <div class="field field-wide">
+        <label for="{{ form.market_context.id_for_label }}">Contexto do mercado</label>
+        {{ form.market_context }}
+      </div>
+      <div class="field field-wide">
+        <label for="{{ form.entry_reason.id_for_label }}">Motivo da entrada</label>
+        {{ form.entry_reason }}
+      </div>
+      <div class="field field-wide">
+        <label for="{{ form.exit_reason.id_for_label }}">Motivo da saída</label>
+        {{ form.exit_reason }}
+      </div>
+      <div class="field field-wide">
+        <label for="{{ form.mistakes.id_for_label }}">Erros</label>
+        {{ form.mistakes }}
+      </div>
+      <div class="field field-wide">
+        <label for="{{ form.lessons.id_for_label }}">Lições</label>
+        {{ form.lessons }}
+      </div>
       <div class="field field-wide">
         {{ form.screenshot.label_tag }}
         {{ form.screenshot }}
