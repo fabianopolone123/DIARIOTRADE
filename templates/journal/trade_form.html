@@ -91,7 +91,7 @@
   <div class="modal-backdrop" id="capture-backdrop"></div>
   <div class="modal-card capture-card" role="dialog" aria-modal="true" aria-labelledby="capture-title">
     <h2 id="capture-title">Capturar tela</h2>
-    <p class="hint">O navegador vai abrir o seletor de tela/janela. Se houver mais de um monitor, escolha o monitor correto e depois recorte a regiao desejada.</p>
+    <p class="hint">O navegador vai abrir o seletor de tela/janela. Para pegar a tela inteira, escolha <strong>Monitor</strong> ou <strong>Tela inteira</strong>. Se selecionar a aba do navegador, a captura fica limitada ao site.</p>
     <div class="capture-stage">
       <canvas id="capture-canvas"></canvas>
       <div id="capture-selection" class="capture-selection capture-selection-hidden"></div>
@@ -261,11 +261,21 @@
         const stream = await navigator.mediaDevices.getDisplayMedia({
           video: {
             displaySurface: "monitor",
+            monitorTypeSurfaces: "include",
+            preferCurrentTab: false,
+            selfBrowserSurface: "exclude",
             cursor: "always",
           },
           audio: false,
         });
         await drawFrame(stream);
+        const settings = stream.getVideoTracks()[0].getSettings();
+        if ((settings.displaySurface || "").toLowerCase() === "browser") {
+          stream.getTracks().forEach((track) => track.stop());
+          captureStream = null;
+          alert("Voce selecionou a aba do navegador. Para capturar a tela inteira, escolha Monitor ou Tela inteira no seletor.");
+          return;
+        }
         captureSelection.classList.add("capture-selection-hidden");
         captureModal.classList.add("is-open");
         captureModal.setAttribute("aria-hidden", "false");

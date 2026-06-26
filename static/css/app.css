@@ -16,8 +16,9 @@ a{color:inherit;text-decoration:none}
 .topbar{display:flex;justify-content:space-between;align-items:center}
 .brand{font-size:20px;font-weight:800;letter-spacing:.3px}
 .subtitle,.panel p,.filters,.empty{color:var(--muted)}
-.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03)}
-.btn-primary{background:linear-gradient(135deg,var(--accent-2),#2dd4bf);border:none;color:#04111f;font-weight:700}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border:1px solid #3e5176;border-radius:12px;background:linear-gradient(180deg,#193055,#10203b);color:#eaf2ff;font-weight:600}
+.btn:hover{background:linear-gradient(180deg,#21406f,#142849)}
+.btn-primary{background:linear-gradient(135deg,var(--accent-2),#2dd4bf);border:none;color:#04111f;font-weight:800;box-shadow:0 10px 24px rgba(79,140,255,.25)}
 .btn-danger{background:var(--danger);border:none;color:#fff}
 .panel,.auth-card{background:rgba(15,23,42,.88);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(12px);border-radius:22px;padding:20px;box-shadow:0 24px 80px rgba(0,0,0,.3)}
 .hero{display:flex;gap:20px;justify-content:space-between;align-items:stretch;margin-bottom:18px}
