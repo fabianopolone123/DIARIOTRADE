@@ -5,7 +5,7 @@ from django.utils import timezone
 
 class Trade(models.Model):
     DIRECTION_CHOICES = [("Compra", "Compra"), ("Venda", "Venda")]
-    RESULT_CHOICES = [("Gain", "Gain"), ("Loss", "Loss"), ("Zero", "Zero")]
+    RESULT_CHOICES = [("Gain", "Ganho"), ("Loss", "Perda"), ("Zero", "Zero")]
     EXECUTION_CHOICES = [("A+", "A+"), ("A", "A"), ("B", "B"), ("C", "C"), ("D", "D")]
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="criado em")
@@ -52,7 +52,7 @@ class Trade(models.Model):
 
 
 class JournalOption(models.Model):
-    KIND_CHOICES = [("setup", "Setup"), ("emotion", "Emotion")]
+    KIND_CHOICES = [("setup", "Setup"), ("emotion", "Emoção")]
     kind = models.CharField(max_length=20, choices=KIND_CHOICES, verbose_name="tipo")
     label = models.CharField(max_length=120, unique=True, verbose_name="nome")
 

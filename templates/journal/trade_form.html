@@ -47,7 +47,7 @@
       <div class="field">
         {{ form.emotion_before.label_tag }}
         {{ form.emotion_before }}
-        <small class="hint">Escolha uma emocao ou cadastre nova.</small>
+        <small class="hint">Escolha uma emoção ou cadastre nova.</small>
       </div>
       <div class="field">{{ form.emotion_during.label_tag }}{{ form.emotion_during }}</div>
       <div class="field">{{ form.emotion_after.label_tag }}{{ form.emotion_after }}</div>
@@ -156,7 +156,7 @@
       optionModal.classList.add("is-open");
       optionModal.setAttribute("aria-hidden", "false");
       optionInput.value = "";
-      optionLabel.textContent = activeField === "setup" ? "Nome do setup" : "Nome da emocao";
+      optionLabel.textContent = activeField === "setup" ? "Nome do setup" : "Nome da emoção";
       optionInput.placeholder = activeField === "setup" ? "Ex.: Rompimento com pullback" : "Ex.: Calmo";
       setTimeout(() => optionInput.focus(), 0);
     };

@@ -21,6 +21,7 @@ class TradeForm(forms.ModelForm):
         setup_choices = kwargs.pop("setup_choices", None)
         emotion_choices = kwargs.pop("emotion_choices", None)
         super().__init__(*args, **kwargs)
+
         if setup_choices is None:
             setup_choices = list(
                 JournalOption.objects.filter(kind="setup").order_by("label").values_list("label", "label")
@@ -29,14 +30,18 @@ class TradeForm(forms.ModelForm):
             emotion_choices = list(
                 JournalOption.objects.filter(kind="emotion").order_by("label").values_list("label", "label")
             )
+
         self.fields["setup"].choices = [("", "--------")] + setup_choices + [(NEW_OPTION, NEW_OPTION)]
         self.fields["setup"].widget.attrs["data-new-option"] = NEW_OPTION
+
         emotion_choices_with_new = [("", "--------")] + emotion_choices + [(NEW_OPTION, NEW_OPTION)]
         for key in ["emotion_before", "emotion_during", "emotion_after"]:
             self.fields[key].choices = emotion_choices_with_new
             self.fields[key].widget.attrs["data-new-option"] = NEW_OPTION
+
         if self.instance and self.instance.pk and self.instance.setup and self.instance.setup not in dict(self.fields["setup"].choices):
             self.fields["setup"].choices = [("", "--------"), (self.instance.setup, self.instance.setup)] + setup_choices + [(NEW_OPTION, NEW_OPTION)]
+
         for key in ["emotion_before", "emotion_during", "emotion_after"]:
             value = getattr(self.instance, key, "")
             if self.instance and self.instance.pk and value and value not in dict(self.fields[key].choices):
@@ -71,11 +76,24 @@ class TradeForm(forms.ModelForm):
             "result",
             "screenshot",
         ]
+        labels = {
+            "setup": "Setup",
+            "emotion_before": "Emoção antes",
+            "emotion_during": "Emoção durante",
+            "emotion_after": "Emoção depois",
+            "market_context": "Contexto de mercado",
+            "entry_reason": "Motivo da entrada",
+            "exit_reason": "Motivo da saída",
+            "planned_trade": "Operação planejada",
+            "followed_plan": "Seguiu o plano",
+            "result": "Resultado",
+            "screenshot": "Print da tela",
+        }
         widgets = {
             "trade_date": forms.DateInput(attrs={"type": "date", "class": "input"}),
             "entry_time": forms.TimeInput(attrs={"type": "time", "class": "input"}),
             "exit_time": forms.TimeInput(attrs={"type": "time", "class": "input"}),
-            "symbol": forms.TextInput(attrs={"class": "input", "placeholder": "Mini Índice"}),
+            "symbol": forms.TextInput(attrs={"class": "input", "placeholder": "Mini índice"}),
             "direction": forms.Select(attrs={"class": "input"}),
             "timeframe": forms.TextInput(attrs={"class": "input"}),
             "entry_price": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
@@ -85,7 +103,11 @@ class TradeForm(forms.ModelForm):
             "target_price": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
             "planned_trade": forms.CheckboxInput(attrs={"class": "checkbox"}),
             "followed_plan": forms.CheckboxInput(attrs={"class": "checkbox"}),
-            "market_context": forms.Textarea(attrs={"class": "textarea", "rows": 4, "placeholder": "Último contexto será reaproveitado automaticamente"}),
+            "market_context": forms.Textarea(attrs={
+                "class": "textarea",
+                "rows": 4,
+                "placeholder": "Ultimo contexto sera reaproveitado automaticamente",
+            }),
             "entry_reason": forms.Textarea(attrs={"class": "textarea", "rows": 4}),
             "exit_reason": forms.Textarea(attrs={"class": "textarea", "rows": 4}),
             "execution_grade": forms.Select(attrs={"class": "input"}),
