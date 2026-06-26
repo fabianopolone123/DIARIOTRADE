@@ -2,16 +2,78 @@
 {% block title %}Trade | Diario Trade Web{% endblock %}
 {% block content %}
 <section class="panel">
-  <h1>{{ object.symbol }} - {{ object.trade_date }}</h1>
+  <div class="detail-header">
+    <div>
+      <h1>{{ object.symbol }} - {{ object.trade_date }}</h1>
+      <p>{{ object.direction }}{% if object.setup %} • {{ object.setup }}{% endif %}{% if object.timeframe %} • {{ object.timeframe }}{% endif %}</p>
+    </div>
+    <div class="form-actions">
+      <a class="btn" href="{% url 'journal:dashboard' %}">Voltar</a>
+      <a class="btn btn-primary" href="{% url 'journal:trade_update' object.pk %}">Editar</a>
+    </div>
+  </div>
+
   <div class="detail-grid">
-    <div><span>Direcao</span><strong>{{ object.direction }}</strong></div>
-    <div><span>Resultado</span><strong>{{ object.result }}</strong></div>
+    <div><span>Resultado</span><strong>{{ object.result|default:"-" }}</strong></div>
     <div><span>P&amp;L</span><strong>{{ object.pnl|floatformat:2 }}</strong></div>
     <div><span>R</span><strong>{{ object.r_multiple|floatformat:2 }}</strong></div>
+    <div><span>Duracao</span><strong>{{ object.duration_minutes }} min</strong></div>
   </div>
-  <p>{{ object.market_context }}</p>
+
+  <div class="detail-sections">
+    <section class="detail-section">
+      <h2>Operacao</h2>
+      <dl class="info-list">
+        <div><dt>Data</dt><dd>{{ object.trade_date|default:"-" }}</dd></div>
+        <div><dt>Entrada</dt><dd>{{ object.entry_time|default:"-" }}</dd></div>
+        <div><dt>Saida</dt><dd>{{ object.exit_time|default:"-" }}</dd></div>
+        <div><dt>Ativo</dt><dd>{{ object.symbol|default:"-" }}</dd></div>
+        <div><dt>Direcao</dt><dd>{{ object.direction|default:"-" }}</dd></div>
+        <div><dt>Setup</dt><dd>{{ object.setup|default:"-" }}</dd></div>
+        <div><dt>Timeframe</dt><dd>{{ object.timeframe|default:"-" }}</dd></div>
+        <div><dt>Quantidade</dt><dd>{{ object.quantity|floatformat:2 }}</dd></div>
+        <div><dt>Stop loss</dt><dd>{{ object.stop_loss|default:"-" }}</dd></div>
+        <div><dt>Alvo</dt><dd>{{ object.target_price|default:"-" }}</dd></div>
+      </dl>
+    </section>
+
+    <section class="detail-section">
+      <h2>Plano e Execucao</h2>
+      <dl class="info-list">
+        <div><dt>Operacao planejada</dt><dd>{% if object.planned_trade %}Sim{% else %}Nao{% endif %}</dd></div>
+        <div><dt>Seguiu o plano</dt><dd>{% if object.followed_plan %}Sim{% else %}Nao{% endif %}</dd></div>
+        <div><dt>Nota de execucao</dt><dd>{{ object.execution_grade|default:"-" }}</dd></div>
+        <div><dt>Risco inicial</dt><dd>{{ object.initial_risk|floatformat:2 }}</dd></div>
+        <div><dt>Risco/retorno</dt><dd>{{ object.risk_reward|floatformat:2 }}</dd></div>
+      </dl>
+    </section>
+
+    <section class="detail-section">
+      <h2>Emocional</h2>
+      <dl class="info-list">
+        <div><dt>Antes</dt><dd>{{ object.emotion_before|default:"-" }}</dd></div>
+        <div><dt>Durante</dt><dd>{{ object.emotion_during|default:"-" }}</dd></div>
+        <div><dt>Depois</dt><dd>{{ object.emotion_after|default:"-" }}</dd></div>
+      </dl>
+    </section>
+
+    <section class="detail-section">
+      <h2>Analise</h2>
+      <div class="text-block"><span>Contexto do mercado</span><p>{{ object.market_context|default:"-"|linebreaksbr }}</p></div>
+      <div class="text-block"><span>Motivo da entrada</span><p>{{ object.entry_reason|default:"-"|linebreaksbr }}</p></div>
+      <div class="text-block"><span>Motivo da saida</span><p>{{ object.exit_reason|default:"-"|linebreaksbr }}</p></div>
+      <div class="text-block"><span>Erros</span><p>{{ object.mistakes|default:"-"|linebreaksbr }}</p></div>
+      <div class="text-block"><span>Licoes</span><p>{{ object.lessons|default:"-"|linebreaksbr }}</p></div>
+    </section>
+  </div>
+
   {% if object.screenshot %}
-    <img src="{{ object.screenshot.url }}" class="screenshot" alt="Screenshot do trade">
+    <section class="detail-section screenshot-section">
+      <h2>Print</h2>
+      <a href="{{ object.screenshot.url }}" target="_blank" rel="noopener">
+        <img src="{{ object.screenshot.url }}" class="screenshot" alt="Screenshot do trade">
+      </a>
+    </section>
   {% endif %}
 </section>
 {% endblock %}
