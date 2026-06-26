@@ -41,6 +41,10 @@ th{color:#aac1e6;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
 .checkbox-field{display:flex;align-items:center;gap:10px;padding-top:30px}
 .mini-actions{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
 .hint{color:var(--muted);font-size:12px}
+.form-error-summary{grid-column:1 / -1;margin-bottom:14px;padding:12px 14px;border:1px solid rgba(255,107,107,.45);border-radius:12px;background:rgba(255,107,107,.12);color:#ffd7d7}
+.form-error-summary strong,.form-error-summary span{display:block}
+.errorlist{list-style:none;margin:6px 0 0;padding:0;color:#ffb4b4;font-size:13px}
+.errorlist li{margin:3px 0}
 .screenshot-preview{max-width:100%;margin-top:12px;border-radius:14px;border:1px solid var(--line)}
 .capture-overlay{position:fixed;inset:0;z-index:9999;background:rgba(4,9,18,.35);cursor:crosshair}
 .capture-selection{position:absolute;border:2px dashed #7dd3fc;background:rgba(125,211,252,.15)}

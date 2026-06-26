@@ -5,6 +5,13 @@
   <h1>{% if object %}Editar trade{% else %}Novo trade{% endif %}</h1>
   <form method="post" enctype="multipart/form-data" class="trade-grid" id="trade-form">
     {% csrf_token %}
+    {% if form.errors %}
+      <div class="form-error-summary" role="alert">
+        <strong>Nao foi possivel salvar.</strong>
+        <span>Confira os campos destacados e tente novamente.</span>
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
     <div class="grid-2">
       <div class="field">
         <label for="{{ form.trade_date.id_for_label }}">Data</label>
@@ -12,6 +19,7 @@
           {{ form.trade_date }}
           <button class="btn" type="button" data-fill="trade_date">Hoje</button>
         </div>
+        {{ form.trade_date.errors }}
       </div>
       <div class="field">
         <label for="{{ form.entry_time.id_for_label }}">Hora de entrada</label>
@@ -19,6 +27,7 @@
           {{ form.entry_time }}
           <button class="btn" type="button" data-fill="entry_time">Agora</button>
         </div>
+        {{ form.entry_time.errors }}
       </div>
       <div class="field">
         <label for="{{ form.exit_time.id_for_label }}">Hora de saida</label>
@@ -26,60 +35,71 @@
           {{ form.exit_time }}
           <button class="btn" type="button" data-fill="exit_time">Agora</button>
         </div>
+        {{ form.exit_time.errors }}
       </div>
-      <div class="field">{{ form.symbol.label_tag }}{{ form.symbol }}</div>
-      <div class="field">{{ form.direction.label_tag }}{{ form.direction }}</div>
+      <div class="field">{{ form.symbol.label_tag }}{{ form.symbol }}{{ form.symbol.errors }}</div>
+      <div class="field">{{ form.direction.label_tag }}{{ form.direction }}{{ form.direction.errors }}</div>
       <div class="field">
         {{ form.setup.label_tag }}
         {{ form.setup }}
+        {{ form.setup.errors }}
         <small class="hint">Escolha um setup ou selecione <strong>+ Cadastrar novo</strong>.</small>
       </div>
-      <div class="field">{{ form.timeframe.label_tag }}{{ form.timeframe }}</div>
-      <div class="field">{{ form.entry_price.label_tag }}{{ form.entry_price }}</div>
-      <div class="field">{{ form.exit_price.label_tag }}{{ form.exit_price }}</div>
-      <div class="field">{{ form.quantity.label_tag }}{{ form.quantity }}</div>
-      <div class="field">{{ form.stop_loss.label_tag }}{{ form.stop_loss }}<small class="hint">Em pontos.</small></div>
-      <div class="field">{{ form.target_price.label_tag }}{{ form.target_price }}<small class="hint">Em pontos.</small></div>
-      <div class="field checkbox-field">{{ form.planned_trade }} <label for="{{ form.planned_trade.id_for_label }}">Operacao planejada</label></div>
-      <div class="field checkbox-field">{{ form.followed_plan }} <label for="{{ form.followed_plan.id_for_label }}">Seguiu o plano</label></div>
-      <div class="field">{{ form.result.label_tag }}{{ form.result }}</div>
-      <div class="field">{{ form.execution_grade.label_tag }}{{ form.execution_grade }}</div>
+      <div class="field">{{ form.timeframe.label_tag }}{{ form.timeframe }}{{ form.timeframe.errors }}</div>
+      <div class="field">{{ form.entry_price.label_tag }}{{ form.entry_price }}{{ form.entry_price.errors }}</div>
+      <div class="field">{{ form.exit_price.label_tag }}{{ form.exit_price }}{{ form.exit_price.errors }}</div>
+      <div class="field">{{ form.quantity.label_tag }}{{ form.quantity }}{{ form.quantity.errors }}</div>
+      <div class="field">{{ form.stop_loss.label_tag }}{{ form.stop_loss }}{{ form.stop_loss.errors }}<small class="hint">Em pontos.</small></div>
+      <div class="field">{{ form.target_price.label_tag }}{{ form.target_price }}{{ form.target_price.errors }}<small class="hint">Em pontos.</small></div>
+      <div class="field checkbox-field">{{ form.planned_trade }} <label for="{{ form.planned_trade.id_for_label }}">Operacao planejada</label>{{ form.planned_trade.errors }}</div>
+      <div class="field checkbox-field">{{ form.followed_plan }} <label for="{{ form.followed_plan.id_for_label }}">Seguiu o plano</label>{{ form.followed_plan.errors }}</div>
+      <div class="field">{{ form.result.label_tag }}{{ form.result }}{{ form.result.errors }}</div>
+      <div class="field">{{ form.execution_grade.label_tag }}{{ form.execution_grade }}{{ form.execution_grade.errors }}</div>
       <div class="field">
         <label for="{{ form.emotion_before.id_for_label }}">Emoção antes</label>
         {{ form.emotion_before }}
+        {{ form.emotion_before.errors }}
         <small class="hint">Escolha uma emoção ou cadastre nova.</small>
       </div>
       <div class="field">
         <label for="{{ form.emotion_during.id_for_label }}">Emoção durante</label>
         {{ form.emotion_during }}
+        {{ form.emotion_during.errors }}
       </div>
       <div class="field">
         <label for="{{ form.emotion_after.id_for_label }}">Emoção depois</label>
         {{ form.emotion_after }}
+        {{ form.emotion_after.errors }}
       </div>
       <div class="field field-wide">
         <label for="{{ form.market_context.id_for_label }}">Contexto do mercado</label>
         {{ form.market_context }}
+        {{ form.market_context.errors }}
       </div>
       <div class="field field-wide">
         <label for="{{ form.entry_reason.id_for_label }}">Motivo da entrada</label>
         {{ form.entry_reason }}
+        {{ form.entry_reason.errors }}
       </div>
       <div class="field field-wide">
         <label for="{{ form.exit_reason.id_for_label }}">Motivo da saída</label>
         {{ form.exit_reason }}
+        {{ form.exit_reason.errors }}
       </div>
       <div class="field field-wide">
         <label for="{{ form.mistakes.id_for_label }}">Erros</label>
         {{ form.mistakes }}
+        {{ form.mistakes.errors }}
       </div>
       <div class="field field-wide">
         <label for="{{ form.lessons.id_for_label }}">Lições</label>
         {{ form.lessons }}
+        {{ form.lessons.errors }}
       </div>
       <div class="field field-wide">
         {{ form.screenshot.label_tag }}
         {{ form.screenshot }}
+        {{ form.screenshot.errors }}
         <div class="mini-actions">
           <button class="btn" type="button" id="capture-region-btn">Tirar print da regiao</button>
           <span class="hint">Captura via navegador da tela ou janela compartilhada.</span>
