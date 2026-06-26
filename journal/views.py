@@ -97,9 +97,12 @@ class TradeCreateView(LoginRequiredMixin, CreateView):
 
     def get_initial(self):
         initial = super().get_initial()
-        last_trade = Trade.objects.exclude(market_context="").order_by("-trade_date", "-id").first()
-        if last_trade and last_trade.market_context:
-            initial["market_context"] = last_trade.market_context
+        last_trade = Trade.objects.order_by("-trade_date", "-id").first()
+        last_trade_with_context = Trade.objects.exclude(market_context="").order_by("-trade_date", "-id").first()
+        if last_trade:
+            initial["quantity"] = last_trade.quantity
+        if last_trade_with_context and last_trade_with_context.market_context:
+            initial["market_context"] = last_trade_with_context.market_context
         initial["symbol"] = "Mini Índice"
         return initial
 
