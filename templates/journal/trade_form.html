@@ -96,6 +96,14 @@
       </div>
       <div class="field field-wide">
         {{ form.screenshot.label_tag }}
+        {% if object and object.screenshot %}
+          <div class="current-screenshot">
+            <span class="hint">Print atual</span>
+            <a href="{{ object.screenshot.url }}" target="_blank" rel="noopener">
+              <img src="{{ object.screenshot.url }}" class="screenshot-preview" alt="Print atual do trade">
+            </a>
+          </div>
+        {% endif %}
         {{ form.screenshot }}
         {{ form.screenshot.errors }}
         <div class="mini-actions">

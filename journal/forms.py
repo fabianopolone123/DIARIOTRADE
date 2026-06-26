@@ -87,9 +87,9 @@ class TradeForm(forms.ModelForm):
             "screenshot",
         ]
         widgets = {
-            "trade_date": forms.DateInput(attrs={"type": "date", "class": "input"}),
-            "entry_time": forms.TimeInput(attrs={"type": "time", "class": "input"}),
-            "exit_time": forms.TimeInput(attrs={"type": "time", "class": "input"}),
+            "trade_date": forms.DateInput(format="%Y-%m-%d", attrs={"type": "date", "class": "input"}),
+            "entry_time": forms.TimeInput(format="%H:%M", attrs={"type": "time", "class": "input"}),
+            "exit_time": forms.TimeInput(format="%H:%M", attrs={"type": "time", "class": "input"}),
             "symbol": forms.TextInput(attrs={"class": "input", "placeholder": "Mini índice"}),
             "direction": forms.Select(attrs={"class": "input"}),
             "timeframe": forms.TextInput(attrs={"class": "input"}),
