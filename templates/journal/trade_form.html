@@ -215,19 +215,21 @@
         optionInput.focus();
         return;
       }
-      const targetSelects = activeField === "setup"
-        ? [setupSelect]
-        : emotionSelects.filter((select) => select.id === activeField);
+      const targetSelects = activeField === "setup" ? [setupSelect] : emotionSelects;
       targetSelects.forEach((select) => {
         if (!select) return;
         const exists = Array.from(select.options).some((option) => option.value === value);
         if (!exists) {
           const option = new Option(value, value, true, true);
           select.add(option, select.options.length - 1);
-        } else {
-          select.value = value;
         }
       });
+      const activeSelect = activeField === "setup"
+        ? setupSelect
+        : emotionSelects.find((select) => select.id === activeField);
+      if (activeSelect) {
+        activeSelect.value = value;
+      }
       closeOptionModal();
     });
 
