@@ -220,7 +220,7 @@
         if (!select) return;
         const exists = Array.from(select.options).some((option) => option.value === value);
         if (!exists) {
-          const option = new Option(value, value, true, true);
+          const option = new Option(value, value, false, false);
           select.add(option, select.options.length - 1);
         }
       });
