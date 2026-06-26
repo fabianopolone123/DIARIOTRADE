@@ -2,3 +2,8 @@ __pycache__/
 *.pyc
 _remote_*.sh
 remote_*.sh
+.venv/
+venv/
+staticfiles/
+media/
+db.sqlite3
