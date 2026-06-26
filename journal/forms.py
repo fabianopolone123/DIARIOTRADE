@@ -12,10 +12,10 @@ class LoginForm(AuthenticationForm):
 
 
 class TradeForm(forms.ModelForm):
-    setup = forms.ChoiceField(choices=(), required=False, widget=forms.Select(attrs={"class": "input"}))
-    emotion_before = forms.ChoiceField(choices=(), required=False, widget=forms.Select(attrs={"class": "input"}))
-    emotion_during = forms.ChoiceField(choices=(), required=False, widget=forms.Select(attrs={"class": "input"}))
-    emotion_after = forms.ChoiceField(choices=(), required=False, widget=forms.Select(attrs={"class": "input"}))
+    setup = forms.CharField(required=False, widget=forms.Select(attrs={"class": "input"}))
+    emotion_before = forms.CharField(required=False, widget=forms.Select(attrs={"class": "input"}))
+    emotion_during = forms.CharField(required=False, widget=forms.Select(attrs={"class": "input"}))
+    emotion_after = forms.CharField(required=False, widget=forms.Select(attrs={"class": "input"}))
 
     def __init__(self, *args, **kwargs):
         setup_choices = kwargs.pop("setup_choices", None)
@@ -43,21 +43,21 @@ class TradeForm(forms.ModelForm):
                 JournalOption.objects.filter(kind="emotion").order_by("label").values_list("label", "label")
             )
 
-        self.fields["setup"].choices = [("", "--------")] + setup_choices + [(NEW_OPTION, NEW_OPTION)]
+        self.fields["setup"].widget.choices = [("", "--------")] + setup_choices + [(NEW_OPTION, NEW_OPTION)]
         self.fields["setup"].widget.attrs["data-new-option"] = NEW_OPTION
 
         emotion_choices_with_new = [("", "--------")] + emotion_choices + [(NEW_OPTION, NEW_OPTION)]
         for key in ["emotion_before", "emotion_during", "emotion_after"]:
-            self.fields[key].choices = emotion_choices_with_new
+            self.fields[key].widget.choices = emotion_choices_with_new
             self.fields[key].widget.attrs["data-new-option"] = NEW_OPTION
 
-        if self.instance and self.instance.pk and self.instance.setup and self.instance.setup not in dict(self.fields["setup"].choices):
-            self.fields["setup"].choices = [("", "--------"), (self.instance.setup, self.instance.setup)] + setup_choices + [(NEW_OPTION, NEW_OPTION)]
+        if self.instance and self.instance.pk and self.instance.setup and self.instance.setup not in dict(self.fields["setup"].widget.choices):
+            self.fields["setup"].widget.choices = [("", "--------"), (self.instance.setup, self.instance.setup)] + setup_choices + [(NEW_OPTION, NEW_OPTION)]
 
         for key in ["emotion_before", "emotion_during", "emotion_after"]:
             value = getattr(self.instance, key, "")
-            if self.instance and self.instance.pk and value and value not in dict(self.fields[key].choices):
-                self.fields[key].choices = [("", "--------"), (value, value)] + emotion_choices + [(NEW_OPTION, NEW_OPTION)]
+            if self.instance and self.instance.pk and value and value not in dict(self.fields[key].widget.choices):
+                self.fields[key].widget.choices = [("", "--------"), (value, value)] + emotion_choices + [(NEW_OPTION, NEW_OPTION)]
 
     class Meta:
         model = Trade
