@@ -82,6 +82,8 @@ class DashboardView(LoginRequiredMixin, ListView):
         "result": "result",
         "setup": "setup",
         "quantity": "quantity",
+        "target_points_net": "target_points_net",
+        "stop_points_net": "stop_points_net",
     }
     SORT_COLUMNS = [
         ("date", "Data"),
@@ -91,6 +93,8 @@ class DashboardView(LoginRequiredMixin, ListView):
         ("result", "Resultado"),
         ("setup", "Setup"),
         ("quantity", "Qtd"),
+        ("target_points_net", "Pontos líquidos"),
+        ("stop_points_net", "Stop líquido"),
     ]
 
     def get_queryset(self):

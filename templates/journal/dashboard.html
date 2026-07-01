@@ -68,6 +68,8 @@
         <td>{{ trade.result }}</td>
         <td>{{ trade.setup }}</td>
         <td>{{ trade.quantity }}</td>
+        <td>{{ trade.target_points_net|default:"" }}</td>
+        <td>{{ trade.stop_points_net|default:"" }}</td>
         <td>{{ trade.r_multiple|floatformat:2 }}</td>
         <td class="row-actions">
           <a href="{% url 'journal:trade_detail' trade.pk %}">Abrir</a>
@@ -76,7 +78,7 @@
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="9" class="empty">Nenhum trade cadastrado.</td></tr>
+      <tr><td colspan="11" class="empty">Nenhum trade cadastrado.</td></tr>
       {% endfor %}
     </tbody>
   </table>
