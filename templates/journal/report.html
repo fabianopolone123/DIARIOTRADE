@@ -1,0 +1,262 @@
+{% extends "journal/base.html" %}
+{% block title %}Relatório | Diário Trade Web{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>Relatório de performance</h1>
+    <p>Análise visual dos seus trades para entender pontos fortes e onde você está errando.</p>
+  </div>
+  <div class="form-actions">
+    <a class="btn" href="{% url 'journal:dashboard' %}">Voltar</a>
+  </div>
+</section>
+
+{% if summary.total == 0 %}
+<section class="panel">
+  <p class="empty">Ainda não há trades suficientes para gerar um relatório.</p>
+</section>
+{% else %}
+
+<section class="panel">
+  <div class="report-summary">
+    <div><span>Trades</span><strong>{{ summary.total }}</strong></div>
+    <div><span>Taxa de acerto</span><strong>{{ summary.win_rate }}%</strong></div>
+    <div><span>Fator de lucro</span><strong>{% if summary.profit_factor %}{{ summary.profit_factor }}{% else %}—{% endif %}</strong></div>
+    <div><span>Expectativa (méd. P&amp;L)</span><strong class="{% if summary.expectancy < 0 %}neg{% else %}pos{% endif %}">{{ summary.expectancy }}</strong></div>
+    <div><span>R médio</span><strong class="{% if summary.avg_r < 0 %}neg{% else %}pos{% endif %}">{{ summary.avg_r }}</strong></div>
+    <div><span>Melhor trade</span><strong class="pos">{{ summary.best_trade }}</strong></div>
+    <div><span>Pior trade</span><strong class="neg">{{ summary.worst_trade }}</strong></div>
+    <div><span>Duração média</span><strong>{{ summary.avg_duration }} min</strong></div>
+    <div><span>Maior sequência de ganhos</span><strong class="pos">{{ summary.longest_win_streak }}</strong></div>
+    <div><span>Maior sequência de perdas</span><strong class="neg">{{ summary.longest_loss_streak }}</strong></div>
+    <div>
+      <span>Sequência atual</span>
+      <strong class="{% if summary.current_streak_type == 'loss' %}neg{% elif summary.current_streak_type == 'win' %}pos{% endif %}">
+        {{ summary.current_streak_count }} {% if summary.current_streak_type == "win" %}ganho(s){% elif summary.current_streak_type == "loss" %}perda(s){% else %}—{% endif %}
+      </strong>
+    </div>
+  </div>
+</section>
+
+{% if worst_setups or worst_emotions %}
+<section class="panel">
+  <h2>Onde você está errando</h2>
+  <div class="insight-columns">
+    {% if worst_setups %}
+    <div>
+      <h3>Setups com P&amp;L médio negativo</h3>
+      <ul class="insight-list">
+        {% for row in worst_setups %}
+        <li><span>{{ row.label }}</span><strong class="neg">{{ row.avg_pnl }}</strong><small>{{ row.count }} trade(s) · {{ row.win_rate }}% acerto</small></li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    {% if worst_emotions %}
+    <div>
+      <h3>Emoções durante o trade associadas a perdas</h3>
+      <ul class="insight-list">
+        {% for row in worst_emotions %}
+        <li><span>{{ row.label }}</span><strong class="neg">{{ row.avg_pnl }}</strong><small>{{ row.count }} trade(s) · {{ row.win_rate }}% acerto</small></li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<section class="panel">
+  <h2>Planejamento e disciplina</h2>
+  <div class="insight-columns">
+    <div>
+      <h3>Planejado x Impulsivo</h3>
+      <ul class="insight-list">
+        {% for row in planned_rows %}
+        <li><span>{{ row.label }}</span><strong class="{% if row.avg_pnl < 0 %}neg{% else %}pos{% endif %}">{{ row.avg_pnl }}</strong><small>{{ row.count }} trade(s) · {{ row.win_rate }}% acerto</small></li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div>
+      <h3>Seguiu o plano?</h3>
+      <ul class="insight-list">
+        {% for row in followed_rows %}
+        <li><span>{{ row.label }}</span><strong class="{% if row.avg_pnl < 0 %}neg{% else %}pos{% endif %}">{{ row.avg_pnl }}</strong><small>{{ row.count }} trade(s) · {{ row.win_rate }}% acerto</small></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="charts-grid">
+  <div class="chart-card chart-wide">
+    <h3>Curva de capital (P&amp;L acumulado)</h3>
+    <canvas id="chart-equity"></canvas>
+  </div>
+  <div class="chart-card">
+    <h3>Distribuição de resultados</h3>
+    <canvas id="chart-result"></canvas>
+  </div>
+  <div class="chart-card">
+    <h3>Distribuição por múltiplo de R</h3>
+    <canvas id="chart-rbuckets"></canvas>
+  </div>
+  <div class="chart-card">
+    <h3>P&amp;L médio por dia da semana</h3>
+    <canvas id="chart-weekday"></canvas>
+  </div>
+  <div class="chart-card">
+    <h3>Taxa de acerto por direção</h3>
+    <canvas id="chart-direction"></canvas>
+  </div>
+  <div class="chart-card chart-wide">
+    <h3>P&amp;L médio por setup</h3>
+    <canvas id="chart-setup"></canvas>
+  </div>
+  {% if emotion_rows %}
+  <div class="chart-card chart-wide">
+    <h3>P&amp;L médio por emoção durante o trade</h3>
+    <canvas id="chart-emotion"></canvas>
+  </div>
+  {% endif %}
+  {% if grade_rows %}
+  <div class="chart-card">
+    <h3>P&amp;L médio por nota de execução</h3>
+    <canvas id="chart-grade"></canvas>
+  </div>
+  {% endif %}
+</section>
+
+{{ chart_data|json_script:"chart-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+  (function () {
+    const data = JSON.parse(document.getElementById("chart-data").textContent);
+
+    const gridColor = "rgba(255,255,255,.08)";
+    const textColor = "#aac1e6";
+    Chart.defaults.color = textColor;
+    Chart.defaults.borderColor = gridColor;
+    Chart.defaults.font.family = "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+
+    const green = "#26d07c";
+    const red = "#ff6b6b";
+    const blue = "#4f8cff";
+
+    function colorBySign(values) {
+      return values.map((v) => (v < 0 ? red : green));
+    }
+
+    new Chart(document.getElementById("chart-equity"), {
+      type: "line",
+      data: {
+        labels: data.equity.labels,
+        datasets: [
+          {
+            label: "P&L acumulado",
+            data: data.equity.values,
+            borderColor: blue,
+            backgroundColor: "rgba(79,140,255,.15)",
+            fill: true,
+            tension: 0.25,
+            pointRadius: 0,
+          },
+        ],
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: { x: { grid: { display: false } }, y: { grid: { color: gridColor } } },
+      },
+    });
+
+    new Chart(document.getElementById("chart-result"), {
+      type: "doughnut",
+      data: {
+        labels: data.result.labels,
+        datasets: [{ data: data.result.values, backgroundColor: [green, red, "#5b6b8c"] }],
+      },
+      options: { plugins: { legend: { position: "bottom" } } },
+    });
+
+    new Chart(document.getElementById("chart-rbuckets"), {
+      type: "bar",
+      data: {
+        labels: data.r_buckets.labels,
+        datasets: [{ label: "Trades", data: data.r_buckets.values, backgroundColor: blue }],
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: { x: { grid: { display: false } }, y: { grid: { color: gridColor }, beginAtZero: true } },
+      },
+    });
+
+    new Chart(document.getElementById("chart-weekday"), {
+      type: "bar",
+      data: {
+        labels: data.weekday.labels,
+        datasets: [{ label: "P&L", data: data.weekday.pnl, backgroundColor: colorBySign(data.weekday.pnl) }],
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: { x: { grid: { display: false } }, y: { grid: { color: gridColor } } },
+      },
+    });
+
+    new Chart(document.getElementById("chart-direction"), {
+      type: "bar",
+      data: {
+        labels: data.direction.labels,
+        datasets: [{ label: "Taxa de acerto (%)", data: data.direction.win_rate, backgroundColor: blue }],
+      },
+      options: {
+        indexAxis: "y",
+        plugins: { legend: { display: false } },
+        scales: { x: { grid: { color: gridColor }, beginAtZero: true, max: 100 }, y: { grid: { display: false } } },
+      },
+    });
+
+    new Chart(document.getElementById("chart-setup"), {
+      type: "bar",
+      data: {
+        labels: data.setup.labels,
+        datasets: [{ label: "P&L médio", data: data.setup.avg_pnl, backgroundColor: colorBySign(data.setup.avg_pnl) }],
+      },
+      options: {
+        indexAxis: "y",
+        plugins: { legend: { display: false } },
+        scales: { x: { grid: { color: gridColor } }, y: { grid: { display: false } } },
+      },
+    });
+
+    if (document.getElementById("chart-emotion")) {
+      new Chart(document.getElementById("chart-emotion"), {
+        type: "bar",
+        data: {
+          labels: data.emotion.labels,
+          datasets: [{ label: "P&L médio", data: data.emotion.avg_pnl, backgroundColor: colorBySign(data.emotion.avg_pnl) }],
+        },
+        options: {
+          indexAxis: "y",
+          plugins: { legend: { display: false } },
+          scales: { x: { grid: { color: gridColor } }, y: { grid: { display: false } } },
+        },
+      });
+    }
+
+    if (document.getElementById("chart-grade")) {
+      new Chart(document.getElementById("chart-grade"), {
+        type: "bar",
+        data: {
+          labels: data.grade.labels,
+          datasets: [{ label: "P&L médio", data: data.grade.avg_pnl, backgroundColor: colorBySign(data.grade.avg_pnl) }],
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: { x: { grid: { display: false } }, y: { grid: { color: gridColor } } },
+        },
+      });
+    }
+  })();
+</script>
+{% endif %}
+{% endblock %}

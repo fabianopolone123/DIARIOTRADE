@@ -47,8 +47,26 @@
       </div>
       <div class="field">{{ form.timeframe.label_tag }}{{ form.timeframe }}{{ form.timeframe.errors }}</div>
       <div class="field">{{ form.quantity.label_tag }}{{ form.quantity }}{{ form.quantity.errors }}</div>
-      <div class="field">{{ form.stop_loss.label_tag }}{{ form.stop_loss }}{{ form.stop_loss.errors }}<small class="hint">Em pontos.</small></div>
-      <div class="field">{{ form.target_price.label_tag }}{{ form.target_price }}{{ form.target_price.errors }}<small class="hint">Em pontos.</small></div>
+      <div class="field">{{ form.stop_loss.label_tag }}{{ form.stop_loss }}{{ form.stop_loss.errors }}<small class="hint">Em pontos (planejado).</small></div>
+      <div class="field">{{ form.target_price.label_tag }}{{ form.target_price }}{{ form.target_price.errors }}<small class="hint">Em pontos (planejado).</small></div>
+      <div class="field field-wide">
+        <label for="{{ form.stop_points_net.id_for_label }}">Stop líquido (pontos)</label>
+        <div class="inline-action">
+          {{ form.stop_points_net }}
+          <button class="btn" type="button" data-copy-from="{{ form.stop_loss.id_for_label }}" data-copy-to="{{ form.stop_points_net.id_for_label }}">Copiar do stop loss</button>
+        </div>
+        {{ form.stop_points_net.errors }}
+        <small class="hint">Pontos que a operação realmente perdeu.</small>
+      </div>
+      <div class="field field-wide">
+        <label for="{{ form.target_points_net.id_for_label }}">Pontos líquidos (alvo)</label>
+        <div class="inline-action">
+          {{ form.target_points_net }}
+          <button class="btn" type="button" data-copy-from="{{ form.target_price.id_for_label }}" data-copy-to="{{ form.target_points_net.id_for_label }}">Copiar do alvo</button>
+        </div>
+        {{ form.target_points_net.errors }}
+        <small class="hint">Pontos que a operação realmente rendeu.</small>
+      </div>
       <div class="field checkbox-field">{{ form.planned_trade }} <label for="{{ form.planned_trade.id_for_label }}">Operacao planejada</label>{{ form.planned_trade.errors }}</div>
       <div class="field checkbox-field">{{ form.followed_plan }} <label for="{{ form.followed_plan.id_for_label }}">Seguiu o plano</label>{{ form.followed_plan.errors }}</div>
       <div class="field">{{ form.result.label_tag }}{{ form.result }}{{ form.result.errors }}</div>
@@ -187,6 +205,15 @@
         const field = document.getElementById(`id_${button.dataset.fill}`);
         if (!field) return;
         field.value = button.dataset.fill === "trade_date" ? today() : nowTime();
+      });
+    });
+
+    document.querySelectorAll("[data-copy-from]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const source = document.getElementById(button.dataset.copyFrom);
+        const target = document.getElementById(button.dataset.copyTo);
+        if (!source || !target) return;
+        target.value = source.value;
       });
     });
 

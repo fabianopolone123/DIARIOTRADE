@@ -33,6 +33,8 @@ class TradeForm(forms.ModelForm):
         self.fields["followed_plan"].label = "Seguiu o plano"
         self.fields["result"].label = "Resultado"
         self.fields["screenshot"].label = "Print da tela"
+        self.fields["stop_points_net"].label = "Stop líquido (pontos)"
+        self.fields["target_points_net"].label = "Pontos líquidos (alvo)"
 
         if setup_choices is None:
             setup_choices = list(
@@ -71,7 +73,9 @@ class TradeForm(forms.ModelForm):
             "timeframe",
             "quantity",
             "stop_loss",
+            "stop_points_net",
             "target_price",
+            "target_points_net",
             "planned_trade",
             "followed_plan",
             "market_context",
@@ -95,7 +99,9 @@ class TradeForm(forms.ModelForm):
             "timeframe": forms.TextInput(attrs={"class": "input"}),
             "quantity": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
             "stop_loss": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
+            "stop_points_net": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
             "target_price": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
+            "target_points_net": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
             "planned_trade": forms.CheckboxInput(attrs={"class": "checkbox"}),
             "followed_plan": forms.CheckboxInput(attrs={"class": "checkbox"}),
             "market_context": forms.Textarea(attrs={

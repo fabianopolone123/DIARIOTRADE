@@ -13,26 +13,49 @@
   </div>
 </section>
 
-<section class="panel">
-  <form class="filters" method="get">
-    <input class="input" type="text" name="symbol" placeholder="Ativo" value="{{ filters.symbol }}">
-    <input class="input" type="date" name="date_from" value="{{ filters.date_from }}">
-    <input class="input" type="date" name="date_to" value="{{ filters.date_to }}">
-    <select class="input" name="result">
-      <option value="">Todos</option>
-      <option value="Gain" {% if filters.result == "Gain" %}selected{% endif %}>Gain</option>
-      <option value="Loss" {% if filters.result == "Loss" %}selected{% endif %}>Loss</option>
-      <option value="Zero" {% if filters.result == "Zero" %}selected{% endif %}>Zero</option>
-    </select>
-    <button class="btn btn-primary" type="submit">Filtrar</button>
-  </form>
+<section class="panel filters-bar">
+  <button class="btn" type="button" id="open-filters">
+    Filtros{% if filters.symbol or filters.date_from or filters.date_to or filters.result %} <span class="filter-badge">ativo</span>{% endif %}
+  </button>
+  {% if filters.symbol or filters.date_from or filters.date_to or filters.result %}
+  <a class="btn" href="{% url 'journal:dashboard' %}">Limpar filtros</a>
+  {% endif %}
 </section>
+
+<div class="modal" id="filters-modal" aria-hidden="true">
+  <div class="modal-backdrop" data-close-modal></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="filters-modal-title">
+    <h2 id="filters-modal-title">Filtrar trades</h2>
+    <form class="filters" method="get">
+      <label for="filter-symbol">Ativo</label>
+      <input class="input" id="filter-symbol" type="text" name="symbol" placeholder="Ativo" value="{{ filters.symbol }}">
+      <label for="filter-date-from">De</label>
+      <input class="input" id="filter-date-from" type="date" name="date_from" value="{{ filters.date_from }}">
+      <label for="filter-date-to">Até</label>
+      <input class="input" id="filter-date-to" type="date" name="date_to" value="{{ filters.date_to }}">
+      <label for="filter-result">Resultado</label>
+      <select class="input" id="filter-result" name="result">
+        <option value="">Todos</option>
+        <option value="Gain" {% if filters.result == "Gain" %}selected{% endif %}>Gain</option>
+        <option value="Loss" {% if filters.result == "Loss" %}selected{% endif %}>Loss</option>
+        <option value="Zero" {% if filters.result == "Zero" %}selected{% endif %}>Zero</option>
+      </select>
+      <div class="form-actions modal-actions">
+        <button class="btn" type="button" data-close-modal>Cancelar</button>
+        <button class="btn btn-primary" type="submit">Filtrar</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <section class="panel table-panel">
   <table>
     <thead>
       <tr>
-        <th>Data</th><th>Hora</th><th>Ativo</th><th>Dir</th><th>Resultado</th><th>Setup</th><th>Qtd</th><th>R</th><th></th>
+        {% for h in headers %}
+        <th><a class="sort-link{% if h.active %} active{% endif %}" href="{{ h.url }}">{{ h.label }}{% if h.active %}{% if h.dir == "asc" %} ▲{% else %} ▼{% endif %}{% endif %}</a></th>
+        {% endfor %}
+        <th>R</th><th></th>
       </tr>
     </thead>
     <tbody>
@@ -58,4 +81,26 @@
     </tbody>
   </table>
 </section>
+
+<script>
+  (function () {
+    const modal = document.getElementById("filters-modal");
+    const openBtn = document.getElementById("open-filters");
+
+    function openModal() {
+      modal.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+    }
+    function closeModal() {
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    openBtn.addEventListener("click", openModal);
+    modal.querySelectorAll("[data-close-modal]").forEach((el) => el.addEventListener("click", closeModal));
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.classList.contains("is-open")) closeModal();
+    });
+  })();
+</script>
 {% endblock %}
