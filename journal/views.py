@@ -28,9 +28,11 @@ def _compute_metrics(trade):
     exit_price = trade.exit_price if trade.exit_price is not None else entry
     qty = trade.quantity or Decimal("0")
     point_value = trade.point_value if trade.point_value is not None else Decimal("1")
+    fee_per_contract = trade.fee_per_contract if trade.fee_per_contract is not None else Decimal("0")
     stop_points = abs(trade.stop_loss or Decimal("0"))
     target_points = abs(trade.target_price or Decimal("0"))
-    fees = trade.fees or Decimal("0")
+    fees = fee_per_contract * qty
+    trade.fees = fees
     side = Decimal("1") if trade.direction == "Compra" else Decimal("-1")
 
     if trade.target_points_net is not None:
@@ -173,6 +175,7 @@ class TradeCreateView(LoginRequiredMixin, CreateView):
         if last_trade:
             initial["quantity"] = last_trade.quantity
             initial["point_value"] = last_trade.point_value
+            initial["fee_per_contract"] = last_trade.fee_per_contract
             initial["stop_loss"] = last_trade.stop_loss
             initial["target_price"] = last_trade.target_price
         if last_trade_with_context and last_trade_with_context.market_context:

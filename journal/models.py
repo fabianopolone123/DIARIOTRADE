@@ -28,6 +28,7 @@ class Trade(models.Model):
     stop_points_net = models.DecimalField(max_digits=14, decimal_places=2, blank=True, null=True, verbose_name="stop líquido (pontos)")
     target_points_net = models.DecimalField(max_digits=14, decimal_places=2, blank=True, null=True, verbose_name="pontos líquidos (alvo)")
     point_value = models.DecimalField(max_digits=14, decimal_places=4, default=Decimal("0.20"), verbose_name="valor por ponto (R$)")
+    fee_per_contract = models.DecimalField(max_digits=14, decimal_places=4, default=Decimal("0.55"), verbose_name="taxa por contrato (R$)")
     fees = models.DecimalField(max_digits=14, decimal_places=2, default=0, verbose_name="taxas")
     planned_trade = models.BooleanField(default=True, verbose_name="operação planejada")
     market_context = models.TextField(blank=True, verbose_name="contexto de mercado")
