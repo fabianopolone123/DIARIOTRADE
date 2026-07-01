@@ -35,6 +35,7 @@ class TradeForm(forms.ModelForm):
         self.fields["screenshot"].label = "Print da tela"
         self.fields["stop_points_net"].label = "Stop líquido (pontos)"
         self.fields["target_points_net"].label = "Pontos líquidos (alvo)"
+        self.fields["point_value"].label = "Valor por ponto (R$)"
 
         if setup_choices is None:
             setup_choices = list(
@@ -72,6 +73,7 @@ class TradeForm(forms.ModelForm):
             "setup",
             "timeframe",
             "quantity",
+            "point_value",
             "stop_loss",
             "stop_points_net",
             "target_price",
@@ -98,6 +100,7 @@ class TradeForm(forms.ModelForm):
             "direction": forms.Select(attrs={"class": "input"}),
             "timeframe": forms.TextInput(attrs={"class": "input"}),
             "quantity": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
+            "point_value": forms.NumberInput(attrs={"class": "input", "step": "0.0001"}),
             "stop_loss": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
             "stop_points_net": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
             "target_price": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),

@@ -32,6 +32,7 @@
         <div><dt>Setup</dt><dd>{{ object.setup|default:"-" }}</dd></div>
         <div><dt>Timeframe</dt><dd>{{ object.timeframe|default:"-" }}</dd></div>
         <div><dt>Quantidade</dt><dd>{{ object.quantity|floatformat:2 }}</dd></div>
+        <div><dt>Valor por ponto</dt><dd>R$ {{ object.point_value|floatformat:2 }}</dd></div>
         <div><dt>Stop loss</dt><dd>{{ object.stop_loss|default:"-" }}</dd></div>
         <div><dt>Stop líquido</dt><dd>{{ object.stop_points_net|default:"-" }}</dd></div>
         <div><dt>Alvo</dt><dd>{{ object.target_price|default:"-" }}</dd></div>

@@ -27,6 +27,7 @@ def _compute_metrics(trade):
     entry = trade.entry_price or Decimal("0")
     exit_price = trade.exit_price if trade.exit_price is not None else entry
     qty = trade.quantity or Decimal("0")
+    point_value = trade.point_value if trade.point_value is not None else Decimal("1")
     stop_points = abs(trade.stop_loss or Decimal("0"))
     target_points = abs(trade.target_price or Decimal("0"))
     fees = trade.fees or Decimal("0")
@@ -40,11 +41,11 @@ def _compute_metrics(trade):
         net_points = None
 
     if net_points is not None:
-        pnl = (net_points * qty) - fees
+        pnl = (net_points * qty * point_value) - fees
     else:
         pnl = ((exit_price - entry) * qty * side) - fees
-    initial_risk = stop_points * qty
-    planned_reward = target_points * qty
+    initial_risk = stop_points * qty * point_value
+    planned_reward = target_points * qty * point_value
     trade.pnl = pnl
     trade.initial_risk = initial_risk
     trade.r_multiple = (pnl / initial_risk) if initial_risk else Decimal("0")
@@ -171,6 +172,7 @@ class TradeCreateView(LoginRequiredMixin, CreateView):
         last_trade_with_context = Trade.objects.exclude(market_context="").order_by("-trade_date", "-id").first()
         if last_trade:
             initial["quantity"] = last_trade.quantity
+            initial["point_value"] = last_trade.point_value
             initial["stop_loss"] = last_trade.stop_loss
             initial["target_price"] = last_trade.target_price
         if last_trade_with_context and last_trade_with_context.market_context:

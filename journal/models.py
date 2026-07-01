@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
@@ -25,6 +27,7 @@ class Trade(models.Model):
     target_price = models.DecimalField(max_digits=14, decimal_places=2, blank=True, null=True, verbose_name="alvo")
     stop_points_net = models.DecimalField(max_digits=14, decimal_places=2, blank=True, null=True, verbose_name="stop líquido (pontos)")
     target_points_net = models.DecimalField(max_digits=14, decimal_places=2, blank=True, null=True, verbose_name="pontos líquidos (alvo)")
+    point_value = models.DecimalField(max_digits=14, decimal_places=4, default=Decimal("0.20"), verbose_name="valor por ponto (R$)")
     fees = models.DecimalField(max_digits=14, decimal_places=2, default=0, verbose_name="taxas")
     planned_trade = models.BooleanField(default=True, verbose_name="operação planejada")
     market_context = models.TextField(blank=True, verbose_name="contexto de mercado")
