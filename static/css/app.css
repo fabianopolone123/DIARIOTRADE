@@ -59,6 +59,8 @@ th{color:#aac1e6;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
 .sort-link:hover{color:#fff}
 .sort-link.active{color:#fff}
 .row-actions{display:flex;gap:10px;color:#9fc1ff}
+.actions-col{position:sticky;right:0;background:var(--panel-2);box-shadow:-8px 0 12px -8px rgba(0,0,0,.5)}
+thead .actions-col{background:var(--panel-2)}
 .trade-grid p{margin:0 0 12px}
 .trade-grid label{display:block;margin:10px 0 6px;color:var(--muted)}
 .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}

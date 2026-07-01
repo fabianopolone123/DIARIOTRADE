@@ -55,7 +55,7 @@
         {% for h in headers %}
         <th><a class="sort-link{% if h.active %} active{% endif %}" href="{{ h.url }}">{{ h.label }}{% if h.active %}{% if h.dir == "asc" %} ▲{% else %} ▼{% endif %}{% endif %}</a></th>
         {% endfor %}
-        <th>R</th><th></th>
+        <th>R</th><th class="actions-col"></th>
       </tr>
     </thead>
     <tbody>
@@ -71,7 +71,7 @@
         <td>{{ trade.target_points_net|default:"" }}</td>
         <td>{{ trade.stop_points_net|default:"" }}</td>
         <td>{{ trade.r_multiple|floatformat:2 }}</td>
-        <td class="row-actions">
+        <td class="row-actions actions-col">
           <a href="{% url 'journal:trade_detail' trade.pk %}">Abrir</a>
           <a href="{% url 'journal:trade_update' trade.pk %}">Editar</a>
           <a href="{% url 'journal:trade_delete' trade.pk %}">Excluir</a>
