@@ -26,6 +26,9 @@ command -v systemctl >/dev/null 2>&1 || die "systemctl nao encontrado"
 [[ -f "$MANAGE_PY" ]] || die "manage.py nao encontrado"
 [[ -f "$REQ_FILE" ]] || die "requirements.txt nao encontrado"
 
+log "Atualizando codigo (git pull)"
+git -C "$APP_DIR" pull --ff-only
+
 log "Instalando dependencias"
 "$PIP_BIN" install -r "$REQ_FILE"
 
